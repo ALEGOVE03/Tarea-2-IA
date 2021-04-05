@@ -1,4 +1,4 @@
-import activacion as ft  # Se importan las funciones de activación
+import funciones as ft  # Se importan las funciones de activación
 import numpy as np
 
 '''
@@ -13,7 +13,6 @@ Parametros de inicialización:
 - act_f: Función de activación para cada neurona de la capa
 '''
 
-
 class neural_layer():
     def __init__(self, n_conn, n_neur, act_f):
         self.act_f = ft.function(act_f)
@@ -26,7 +25,8 @@ class neural_layer():
 def split_data(data, split):
     np.random.seed()
     data = np.random.permutation(data)
-    data_1, data_2 = np.split(data, [int((1-split)*len(data))])
+    train, validate = np.split(data, [int((1-split)*len(data))])
+
     # Se acomodan los datos entre validación
     data_train = train[:, :-1]
     copia = []
@@ -44,8 +44,6 @@ def split_data(data, split):
     # Final de reacomodar datos
     return data_train, y_train, data_valid, y_valid
 
-
-
 '''
 Entrenamiento de la red neuronal
 Entradas
@@ -60,49 +58,73 @@ Entradas
 def train(neural_net, data, num_iter, num_validation, val_size, l2_cost, lr=0.001, train=True):
 
     X, Y, X_valid, Y_valid = split_data(data, val_size)
-
-    out = [(None, X)]
+    loss_train, loss_valid = []
 
     for i in range(num_iter):
+        out = [(None, X)]
+
         # Forwad pass
         for l, layer in enumerate(neural_net):
-            z = out[-1][1]  @ neural_net[l].w + neural_net[l].theta
-            a = neural_net[l].act_f[0](z)
+            if l == len(neural_net):
+                z = out[-1][1]  @ neural_net[l].w
+                a = neural_net[l].act_f[0](z, neural_net[l].theta)
+            else:
+                z = out[-1][1]  @ neural_net[l].w + neural_net[l].theta
+                a = neural_net[l].act_f[0](z)
             out.append((z, a))
 
         # Se encarga de actualizar los pesos
-        if train:
-            # Backward pass
-            deltas = []
+        # Backward pass
+        deltas = []
 
-            for l in reversed(range(0, len(neural_net))):
-                if (l == len(neural_net) - 1):
-                    # Calcular delta última capa
-                    a = out[l+1][1]
-                    deltas.insert(0, l2_cost[1](a, Y) * neural_net[l].act_f[1](a))
-                    neural_net.b = neural_net.b - lr * l2_cost[1](a, Y) * act_f[2](a)
-                else:
-                    deltas.insert(0, deltas[0] @ _W.T * neural_net[l].act_f[1](a))
+        for l in reversed(range(0, len(neural_net))):
+            if (l == len(neural_net) - 1):
+                # Calcular delta última capa
+                a = out[l+1][1]
+                deltas.insert(0, l2_cost[1](a, Y) * neural_net[l].act_f[1](a))
+                neural_net.b = neural_net.b - lr * l2_cost[1](a, Y) * act_f[2](a)
+            else:
+                deltas.insert(0, deltas[0] @ _W.T * neural_net[l].act_f[1](a))
 
-                _W = neural_net[l].w
+            _W = neural_net[l].w
 
-                # Gradient descent
-                neural_net[l].theta = neural_net[l].theta - np.mean(deltas[0], axis=0, keepdims=True) * lr
-                neural_net[l].w = neural_net[l].w - lr * out[l][1].T @ deltas[0]
+            # Gradient descent
+            neural_net[l].theta = neural_net[l].theta - np.mean(deltas[0], axis=0, keepdims=True) * lr
+            neural_net[l].w = neural_net[l].w - lr * out[l][1].T @ deltas[0]
 
         # Guardar datos de pérdida
-        history = ['loss', 'valid']
-        history['loss'].append(l2_cost[1](a, Y))
-        if i % num_validation == 0:
-            history['valid'].append(l2_cost[1](a, Y_val)) # Esto está mal
+        loss_train.append(l2_cost[1](a, Y))
 
+        # Hacer pérdida de validación
+        if i % num_validation == 0:
+            out = [(None, X_valid)]
+
+            # Forwad pass
+            for l, layer in enumerate(neural_net):
+                if l == len(neural_net):
+                    z = out[-1][1]  @ neural_net[l].w
+                    a = neural_net[l].act_f[0](z, neural_net[l].theta)
+                else:
+                    z = out[-1][1]  @ neural_net[l].w + neural_net[l].theta
+                    a = neural_net[l].act_f[0](z)
+                out.append((z, a))
+
+            # Guardar pérdida de validacion
+            loss_valid.append(l2_cost[1](a, Y_val))
+
+    return neural_net, [loss_train, loss_valid]
+
+# Hacer prediciones de la red neuronal, ya entrenada
 def predict(neural_net, X):
     out = [(None, X)]
-
     # Forwad pass
     for l, layer in enumerate(neural_net):
-        z = out[-1][1]  @ neural_net[l].w + neural_net[l].b
-        a = neural_net[l].act_f[0](z)
+        if l == len(neural_net):
+            z = out[-1][1]  @ neural_net[l].w
+            a = neural_net[l].act_f[0](z, neural_net[l].theta)
+        else:
+            z = out[-1][1]  @ neural_net[l].w + neural_net[l].theta
+            a = neural_net[l].act_f[0](z)
         out.append((z, a))
 
-    return out
+    return a

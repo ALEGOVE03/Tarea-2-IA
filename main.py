@@ -7,4 +7,5 @@ data = np.genfromtxt('Datos/erosion.data')
 print(data)
 print()
 
-X, Y, X_valid, Y_valid = nn.split_data(data, 0.3)
+red = [nn.neural_layer(len(data[:-1]), 4, 'sigmoid'),
+       nn.neural_layer(4, 1, 'linear')]
