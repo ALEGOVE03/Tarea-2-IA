@@ -29,6 +29,9 @@ def der_ReLU(x):
 ReLU = (lambda x: np.maximum(0, x),
         lambda x: der_ReLU(x))
 
+linear = (lambda x, b: x + b,
+         1, 1)
+
 def function(nombre):
     if nombre == 'sigmoid':
         return sigmoid
@@ -36,6 +39,8 @@ def function(nombre):
         return tanh
     elif nombre == 'ReLU':
         return ReLU
+    elif nombre == 'linear':
+        return linear
     else:
         print("Incorrect activation function parameter")
         sys.exit(1)
