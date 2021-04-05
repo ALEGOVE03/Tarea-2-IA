@@ -29,8 +29,7 @@ def der_ReLU(x):
 ReLU = (lambda x: np.maximum(0, x),
         lambda x: der_ReLU(x))
 
-linear = (lambda x, b: x + b,
-         1, 1)
+linear = (lambda x, b: x + b, 1)
 
 def function(nombre):
     if nombre == 'sigmoid':
