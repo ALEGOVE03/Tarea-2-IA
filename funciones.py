@@ -44,3 +44,13 @@ def function(nombre):
     else:
         print("Incorrect activation function parameter")
         sys.exit(1)
+
+
+'''
+Funciónes de pérdida y sus derivadas, las utilizadas son:
+
+- Regularización L2
+'''
+
+l2_cost = (lambda Yp, Yr: np.mean((Yp - Yr) ** 2),
+           lambda Yp, Yr: 2 * (Yp - Yr))

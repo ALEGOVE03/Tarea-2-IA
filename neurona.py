@@ -1,8 +1,5 @@
 import activacion as ft  # Se importan las funciones de activación
-import matplotlib.pyplot as plt
 import numpy as np
-
-from sklearn.datasets import make_circles
 
 '''
 Clase para crear una capa de la red neuronal
@@ -25,47 +22,79 @@ class neural_layer():
         if act_f == 'linear':
             self.b = np.random.rand(1, n_neur) * 2 - 1
 
+# Divide los datos entre entrenamiento y validación
+def split_data(data, split):
+    np.random.seed()
+    data = np.random.permutation(data)
+    data_1, data_2 = np.split(data, [int((1-split)*len(data))])
+    # Se acomodan los datos entre validación
+    data_train = train[:, :-1]
+    copia = []
+    for i in range(len(train)):
+        copia.append([train[i, -1]])
+
+    y_train = np.array(copia)
+
+    data_valid = validate[:, :-1]
+    copia = []
+    for i in range(len(validate)):
+        copia.append([validate[i, -1]])
+
+    y_valid = np.array(copia)
+    # Final de reacomodar datos
+    return data_train, y_train, data_valid, y_valid
+
+
+
 '''
-Mejor no ponerlo
-def create_nn(topology, act_f):
-    nn = []  # Contiene las capas de la red neurnal
-    for l, layer in enumerate(topology[:-1]):
-        nn.append(neural_layer(topology[l], topology[l + 1], act_f))
-    return nn
+Entrenamiento de la red neuronal
+Entradas
+- neural_net: Red neuronal a entrenar
+- data: Datos para el entrenamiento
+- num_iter: Número de iteraciones
+- num_validation: Cada cuanto se hace una validación
+- val_size: Porcentaje de los datos utilizados para validación
+- l2_cost
 '''
 
-# Función de pérdida y su derivada
-l2_cost = (lambda Yp, Yr: np.mean((Yp - Yr) ** 2),
-           lambda Yp, Yr: 2 * (Yp - Yr))
+def train(neural_net, data, num_iter, num_validation, val_size, l2_cost, lr=0.001, train=True):
 
-def train(neural_net, X, Y, num_validation, num_iter, split, l2_cost, lr=0.001, train=True):
+    X, Y, X_valid, Y_valid = split_data(data, val_size)
 
     out = [(None, X)]
 
-    # Forwad pass
-    for l, layer in enumerate(neural_net):
-        z = out[-1][1]  @ neural_net[l].w + neural_net[l].theta
-        a = neural_net[l].act_f[0](z)
-        out.append((z, a))
+    for i in range(num_iter):
+        # Forwad pass
+        for l, layer in enumerate(neural_net):
+            z = out[-1][1]  @ neural_net[l].w + neural_net[l].theta
+            a = neural_net[l].act_f[0](z)
+            out.append((z, a))
 
-    if train:
-        # Backward pass
-        deltas = []
+        # Se encarga de actualizar los pesos
+        if train:
+            # Backward pass
+            deltas = []
 
-        for l in reversed(range(0, len(neural_net))):
-            if (l == len(neural_net) - 1):
-                # Calcular delta última capa
-                a = out[l+1][1]
-                deltas.insert(0, l2_cost[1](a, Y) * neural_net[l].act_f[1](a))
-                neural_net.b = neural_net.b - lr * np.mean(l2_cost[1](a, Y) * act_f[2](a))
-            else:
-                deltas.insert(0, deltas[0] @ _W.T * neural_net[l].act_f[1](a))
+            for l in reversed(range(0, len(neural_net))):
+                if (l == len(neural_net) - 1):
+                    # Calcular delta última capa
+                    a = out[l+1][1]
+                    deltas.insert(0, l2_cost[1](a, Y) * neural_net[l].act_f[1](a))
+                    neural_net.b = neural_net.b - lr * l2_cost[1](a, Y) * act_f[2](a)
+                else:
+                    deltas.insert(0, deltas[0] @ _W.T * neural_net[l].act_f[1](a))
 
-            _W = neural_net[l].w
+                _W = neural_net[l].w
 
-            # Gradient descent
-            neural_net[l].theta = neural_net[l].theta - np.mean(deltas[0], axis=0, keepdims=True) * lr
-            neural_net[l].w = neural_net[l].w - lr * out[l][1].T @ deltas[0]
+                # Gradient descent
+                neural_net[l].theta = neural_net[l].theta - np.mean(deltas[0], axis=0, keepdims=True) * lr
+                neural_net[l].w = neural_net[l].w - lr * out[l][1].T @ deltas[0]
+
+        # Guardar datos de pérdida
+        history = ['loss', 'valid']
+        history['loss'].append(l2_cost[1](a, Y))
+        if i % num_validation == 0:
+            history['valid'].append(l2_cost[1](a, Y_val)) # Esto está mal
 
 def predict(neural_net, X):
     out = [(None, X)]
