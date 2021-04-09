@@ -1,5 +1,9 @@
 import funciones as ft  # Se importan las funciones de activación
 import numpy as np
+import random
+
+l2_cost = (lambda Yp, Yr: np.mean((Yp - Yr) ** 2),
+           lambda Yp, Yr: 2 * (Yp - Yr))
 
 '''
 Clase para crear una capa de la red neuronal
@@ -18,8 +22,6 @@ class neural_layer():
         self.act_f = ft.function(act_f)
         self.theta = np.random.rand(1, n_neur) * 2 - 1
         self.w = np.random.rand(n_conn, n_neur) * 2 - 1
-        if act_f == 'linear':
-            self.b = np.random.rand(1, n_neur) * 2 - 1
 
 # Divide los datos entre entrenamiento y validación
 def split_data(data, split):
@@ -55,22 +57,19 @@ Entradas
 - l2_cost
 '''
 
-def train(neural_net, data, num_iter, num_validation, val_size, l2_cost, lr=0.001, train=True):
+def train(neural_net, data, num_iter, num_validation, val_size, lr=0.001):
 
     X, Y, X_valid, Y_valid = split_data(data, val_size)
-    loss_train, loss_valid = []
+    loss_train = []
+    loss_valid = []
 
     for i in range(num_iter):
         out = [(None, X)]
 
         # Forwad pass
         for l, layer in enumerate(neural_net):
-            if l == len(neural_net):
-                z = out[-1][1]  @ neural_net[l].w
-                a = neural_net[l].act_f[0](z, neural_net[l].theta)
-            else:
-                z = out[-1][1]  @ neural_net[l].w + neural_net[l].theta
-                a = neural_net[l].act_f[0](z)
+            z = out[-1][1] @ neural_net[l].w + neural_net[l].theta
+            a = neural_net[l].act_f[0](z)
             out.append((z, a))
 
         # Se encarga de actualizar los pesos
@@ -78,11 +77,10 @@ def train(neural_net, data, num_iter, num_validation, val_size, l2_cost, lr=0.00
         deltas = []
 
         for l in reversed(range(0, len(neural_net))):
+            a = out[l+1][1]
             if (l == len(neural_net) - 1):
                 # Calcular delta última capa
-                a = out[l+1][1]
                 deltas.insert(0, l2_cost[1](a, Y) * neural_net[l].act_f[1](a))
-                neural_net.b = neural_net.b - lr * l2_cost[1](a, Y) * act_f[2](a)
             else:
                 deltas.insert(0, deltas[0] @ _W.T * neural_net[l].act_f[1](a))
 
@@ -93,38 +91,30 @@ def train(neural_net, data, num_iter, num_validation, val_size, l2_cost, lr=0.00
             neural_net[l].w = neural_net[l].w - lr * out[l][1].T @ deltas[0]
 
         # Guardar datos de pérdida
-        loss_train.append(l2_cost[1](a, Y))
+        loss_train.append(np.mean(l2_cost[0](out[-1][1], Y)))
 
         # Hacer pérdida de validación
-        if i % num_validation == 0:
+        if i % num_validation == 0 and num_validation != 0:
             out = [(None, X_valid)]
 
             # Forwad pass
             for l, layer in enumerate(neural_net):
-                if l == len(neural_net):
-                    z = out[-1][1]  @ neural_net[l].w
-                    a = neural_net[l].act_f[0](z, neural_net[l].theta)
-                else:
-                    z = out[-1][1]  @ neural_net[l].w + neural_net[l].theta
-                    a = neural_net[l].act_f[0](z)
+                z = out[-1][1] @ neural_net[l].w + neural_net[l].theta
+                a = neural_net[l].act_f[0](z)
                 out.append((z, a))
 
             # Guardar pérdida de validacion
-            loss_valid.append(l2_cost[1](a, Y_val))
+            loss_valid.append(np.mean(l2_cost[0](a, Y_valid)))
 
-    return neural_net, [loss_train, loss_valid]
+    return [loss_train, loss_valid]
 
 # Hacer prediciones de la red neuronal, ya entrenada
 def predict(neural_net, X):
     out = [(None, X)]
     # Forwad pass
     for l, layer in enumerate(neural_net):
-        if l == len(neural_net):
-            z = out[-1][1]  @ neural_net[l].w
-            a = neural_net[l].act_f[0](z, neural_net[l].theta)
-        else:
-            z = out[-1][1]  @ neural_net[l].w + neural_net[l].theta
-            a = neural_net[l].act_f[0](z)
+        z = out[-1][1] @ neural_net[l].w + neural_net[l].theta
+        a = neural_net[l].act_f[0](z)
         out.append((z, a))
 
-    return a
+    return np.mean(a)

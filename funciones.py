@@ -18,18 +18,28 @@ tanh = (lambda x: np.tanh(x),
         lambda x: 1 - (np.tanh(x)) ** 2)
 
 def der_ReLU(x):
-    resul = []
-    for i in x:
-        if i > 0:
-            resul.append(1)
-        else:
-            resul.append(0)
-    return resul
+    temp = len(x[0])
+    resul2 = []
+    for i in range(len(x)):
+        resul = []
+        for j in range(temp):
+            if x[i][j] > 0:
+                resul.append(1)
+            else:
+                resul.append(0)
+        resul2.append(resul)
+    return resul2
 
 ReLU = (lambda x: np.maximum(0, x),
         lambda x: der_ReLU(x))
 
-linear = (lambda x, b: x + b, 1)
+def der_linear(x):
+    temp = []
+    for i in range(len(x)):
+        temp.append([1])
+    return np.array(temp)
+
+linear = (lambda x: x, lambda x: der_linear(x))
 
 def function(nombre):
     if nombre == 'sigmoid':
