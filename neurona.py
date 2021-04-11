@@ -99,7 +99,7 @@ def train(neural_net, data, num_iter, num_validation, val_size, lr=0.001, gauss=
             neural_net[l].w = neural_net[l].w - lr * out[l][1].T @ deltas[0]
 
         # Guardar datos de pérdida
-        loss_train.append(np.mean(l2_cost[0](out[-1][1], Y)))
+        loss_train.append(l2_cost[0](out[-1][1], Y))
 
         # Hacer pérdida de validación
         if i % num_validation == 0 and num_validation != 0:
@@ -114,7 +114,20 @@ def train(neural_net, data, num_iter, num_validation, val_size, lr=0.001, gauss=
             # Guardar pérdida de validacion
             loss_valid.append(np.mean(l2_cost[0](a, Y_valid)))
 
-    return [loss_train, loss_valid]
+    out = [(None, X)]
+
+    # Forwad pass
+    for l, layer in enumerate(neural_net):
+        z = out[-1][1] @ neural_net[l].w + neural_net[l].theta
+        a = neural_net[l].act_f[0](z)
+        out.append((z, a))
+
+    loss = l2_cost[0](a, Y)
+    y_mean = np.mean(Y)
+
+    R2 = 1 - (loss/y_mean)
+
+    return [loss_train, loss_valid, R2]
 
 # Hacer prediciones de la red neuronal, ya entrenada
 def predict(neural_net, X):
