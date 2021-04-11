@@ -11,7 +11,7 @@ import sys  # Para cerrar el programa si hay un error
 import numpy as np
 
 # Se declara la función sigmoide
-sigmoid = (lambda x: 1 / (1 + np.exp(-x)),
+sigmoid = (lambda x: np.around(1 / (1 + np.exp(-x, dtype=np.float64))),
            lambda x: sigmoid[0](x) * (1 - sigmoid[0](x)))
 
 tanh = (lambda x: np.tanh(x),

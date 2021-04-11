@@ -1,9 +1,10 @@
 import funciones as ft  # Se importan las funciones de activación
 import numpy as np
 import random
+import os
+import errno
 
-l2_cost = (lambda Yp, Yr: np.mean((Yp - Yr) ** 2),
-           lambda Yp, Yr: 2 * (Yp - Yr))
+l2_cost = ft.l2_cost
 
 '''
 Clase para crear una capa de la red neuronal
@@ -15,6 +16,9 @@ Parametros de inicialización:
 - n_neur: Número de neuronas de la capa
 
 - act_f: Función de activación para cada neurona de la capa
+
+- funct: Es un string que permite guardar la red neuronal sin perder
+la función de activación de la capa
 '''
 
 class neural_layer():
@@ -22,6 +26,7 @@ class neural_layer():
         self.act_f = ft.function(act_f)
         self.theta = np.random.rand(1, n_neur) * 2 - 1
         self.w = np.random.rand(n_conn, n_neur) * 2 - 1
+        self.funct = act_f
 
 # Divide los datos entre entrenamiento y validación
 def split_data(data, split):
@@ -57,13 +62,16 @@ Entradas
 - l2_cost
 '''
 
-def train(neural_net, data, num_iter, num_validation, val_size, lr=0.001):
+def train(neural_net, data, num_iter, num_validation, val_size, lr=0.001, gauss=False):
 
     X, Y, X_valid, Y_valid = split_data(data, val_size)
     loss_train = []
     loss_valid = []
 
     for i in range(num_iter):
+        if gauss:
+            lr = random.gauss(lr, lr * 0.25)
+
         out = [(None, X)]
 
         # Forwad pass
@@ -118,3 +126,69 @@ def predict(neural_net, X):
         out.append((z, a))
 
     return np.mean(a)
+
+# Guardar pesos y bias de la red neuronal
+def save(neural_net, direction):
+    inicio = False
+    direc = ""
+
+    # Se crea el directorio donde se guardan los pesos de la red
+    for i in reversed(range(len(direction))):
+        if inicio:
+            if direction[i] == "/":
+                break
+            else:
+                direc += direction[i]
+        if direction[i] == ".":
+            inicio = True
+
+    try: # Error en el caso que el directorio ya exista
+        os.mkdir('Pesos/' + direc)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
+
+    file = open(direction, "w")
+    file.write(str(len(neural_net)))
+
+    for i in range(len(neural_net)):
+        dir2 = "Pesos/" + direc + "/" + direc + "_W" + str(i) + ".txt"
+        np.savetxt(dir2, neural_net[i].w)
+        dir2 = "Pesos/" + direc + "/" + direc + "_b" + str(i) + ".txt"
+        np.savetxt(dir2, neural_net[i].theta)
+        file.write("\n" + neural_net[i].funct)
+
+    file.close()
+
+def load(direction):
+    inicio = False
+    direc = ""
+
+    # Se crea el directorio donde se guardan los pesos de la red
+    for i in reversed(range(len(direction))):
+        if inicio:
+            if direction[i] == "/":
+                break
+            else:
+                direc += direction[i]
+        if direction[i] == ".":
+            inicio = True
+
+    datos = []
+    with open(direction) as file:
+    	lineas = file.readlines()
+    	for linea in lineas:
+    		datos.append(linea.strip('\n'))
+
+    red = []
+
+    for i in range(int(datos[0])):
+        dir = "Pesos/" + direc + "/" + direc + "_W" + str(i) + ".txt"
+        matriz = np.loadtxt(dir)
+        red.append(neural_layer(1, 1, datos[i + 1]))
+        red[-1].w = matriz
+        dir = "Pesos/" + direc + "/" + direc + "_b" + str(i) + ".txt"
+        matriz = np.loadtxt(dir)
+        red[-1].theta = matriz
+
+    return red
