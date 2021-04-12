@@ -2,3 +2,4 @@
 sigmoid
 sigmoid
 linear
+140.987

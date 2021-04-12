@@ -5,18 +5,21 @@ derivadas, las funciones utilizadas son:
 - Sigmoid
 - Tanh
 - Relu
+- Lineal
 '''
 
 import sys  # Para cerrar el programa si hay un error
-import numpy as np
+import numpy as np # Trabajar con matrices
 
-# Se declara la función sigmoide
+# Se declara la función sigmoide y su derivada
 sigmoid = (lambda x: np.around(1 / (1 + np.exp(-x, dtype=np.float64))),
            lambda x: sigmoid[0](x) * (1 - sigmoid[0](x)))
 
+# Se declara la función tanh y su derivada
 tanh = (lambda x: np.tanh(x),
         lambda x: 1 - (np.tanh(x)) ** 2)
 
+# Se define la derivada de la función ReLU de forma matricial
 def der_ReLU(x):
     temp = len(x[0])
     resul2 = []
@@ -30,9 +33,11 @@ def der_ReLU(x):
         resul2.append(resul)
     return resul2
 
+# Se define la función ReLU con si derivada
 ReLU = (lambda x: np.maximum(0, x),
         lambda x: der_ReLU(x))
 
+# Se define la derivada de la función lineal con su derivada
 def der_linear(x):
     temp = []
     num = len(x[0])
@@ -44,8 +49,10 @@ def der_linear(x):
 
     return np.array(temp)
 
+# Se define la función lineal y su derivada
 linear = (lambda x: x, lambda x: der_linear(x))
 
+# Función para devolver la función deseada a trabajar en la capa de la red
 def function(nombre):
     if nombre == 'sigmoid':
         return sigmoid
@@ -66,5 +73,6 @@ Funciónes de pérdida y sus derivadas, las utilizadas son:
 - Regularización L2
 '''
 
+# Se define la función de pérdida L2
 l2_cost = (lambda Yp, Yr: np.mean((Yp - Yr) ** 2),
            lambda Yp, Yr: 2 * (Yp - Yr))
