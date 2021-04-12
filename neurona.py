@@ -24,8 +24,8 @@ la función de activación de la capa
 class neural_layer():
     def __init__(self, n_conn, n_neur, act_f):
         self.act_f = ft.function(act_f)
-        self.theta = np.random.rand(1, n_neur) * 2 - 1
-        self.w = np.random.rand(n_conn, n_neur) * 2 - 1
+        self.theta = np.random.rand(1, n_neur)
+        self.w = np.random.rand(n_conn, n_neur)
         self.funct = act_f
 
 # Divide los datos entre entrenamiento y validación
@@ -130,7 +130,7 @@ def train(neural_net, data, num_iter, num_validation, val_size, lr=0.001, gauss=
     return [loss_train, loss_valid, R2]
 
 # Hacer prediciones de la red neuronal, ya entrenada
-def predict(neural_net, X):
+def predict(neural_net, X, salida):
     out = [(None, X)]
     # Forwad pass
     for l, layer in enumerate(neural_net):
@@ -138,7 +138,7 @@ def predict(neural_net, X):
         a = neural_net[l].act_f[0](z)
         out.append((z, a))
 
-    return np.mean(a)
+    return np.mean(a) * salida
 
 # Guardar pesos y bias de la red neuronal
 def save(neural_net, direction):

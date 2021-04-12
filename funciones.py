@@ -35,8 +35,13 @@ ReLU = (lambda x: np.maximum(0, x),
 
 def der_linear(x):
     temp = []
+    num = len(x[0])
     for i in range(len(x)):
-        temp.append([1])
+        resul = []
+        for j in range(num):
+            resul.append(1)
+        temp.append(resul)
+
     return np.array(temp)
 
 linear = (lambda x: x, lambda x: der_linear(x))
