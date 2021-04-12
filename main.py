@@ -19,25 +19,43 @@ data = data.T
 print(data)
 
 red = [nn.neural_layer(len(data[0][:-1]), 4, 'sigmoid'),
-       nn.neural_layer(4, 5, 'sigmoid'),
-       nn.neural_layer(5, 1, 'linear')]
+       nn.neural_layer(4, 2, 'sigmoid'),
+       nn.neural_layer(2, 1, 'linear')]
 
 num_iter = 50
 num_valid = num_iter // 10
 
 loss, valid, R2 = nn.train(red, data, num_iter, num_valid, 0.3, 0.00001, False)
 
-axis = []
-axis2 = []
+x_loss = []
+x_val = []
 
 for i in range(len(loss)):
     if i % num_valid == 0:
-        axis2.append(i)
-    axis.append(i)
+        x_val.append(i)
+    x_loss.append(i)
 
-plt.plot(axis, loss)
-plt.plot(axis2, valid)
+plt.plot(x_loss, loss)
+plt.plot(x_val, valid)
 plt.show()
+
+# ================ Guardar curvas de périda ================
+
+file = open("Curvas/LossTrain.txt", "w")
+for i in range(len(loss)):
+    file.write(str(x_loss[i]) + " " + str(loss[i]) + "\n")
+file.close()
+
+file = open("Curvas/LossValid.txt", "w")
+for i in range(len(valid)):
+    file.write(str(x_val[i]) + " " + str(valid[i]) + "\n")
+
+file.close()
+
+# ================ Guardar valor R2  ================
+file = open("Curvas/R2.txt", "w")
+file.write(str(R2))
+file.close()
 
 # Guardar los pesos de la red
 print(loss[-1])
