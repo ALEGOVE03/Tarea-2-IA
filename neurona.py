@@ -118,6 +118,7 @@ def train(neural_net, data, num_iter, num_validation, val_size, lr=0.001, gauss=
             # del backpropagation
             _W = neural_net[l].w
 
+            # Se obtienen los valores de los pesos para el estudio de la evolución
             if l == 1:
                 if i <= 10:
                     temp = - lr * out[l][1].T @ deltas[0]
@@ -165,8 +166,9 @@ def train(neural_net, data, num_iter, num_validation, val_size, lr=0.001, gauss=
     loss = l2_cost[0](a, Y)
     # Se obtiene el valor medio de los datos reales de los datos
     y_mean = np.mean(Y)
+    y_loss = l2_cost[0](Y, y_mean)
 
-    R2 = 1 - (loss/y_mean) # Obtención del R2
+    R2 = 1 - (loss/y_loss) # Obtención del R2
 
     # Regresa valores relevantes en la red
     return [loss_train, loss_valid, R2, pesos]

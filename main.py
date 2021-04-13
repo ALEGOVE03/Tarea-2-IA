@@ -23,9 +23,9 @@ data = data.T
 print(data)
 
 # Se define la red con la cantidad de capas a utilizar
-red = [nn.neural_layer(len(data[0][:-1]), 4, 'tanh'),
-       nn.neural_layer(4, 4, 'tanh'),
-       nn.neural_layer(4, 1, 'tanh')]
+red = [nn.neural_layer(len(data[0][:-1]), 4, 'sigmoid'),
+       nn.neural_layer(4, 4, 'sigmoid'),
+       nn.neural_layer(4, 1, 'sigmoid')]
 
 # Numero de iteraciones de entrenamiento
 num_iter = 50
@@ -34,7 +34,7 @@ num_valid = num_iter // 10
 
 # Se realiza el entrenamiento de la red y se obtienen las pérdida y
 # el coeficiente de determinación
-loss, valid, R2, pesos = nn.train(red, data, num_iter, num_valid, 0.3, 0.00001, False)
+loss, valid, R2, pesos = nn.train(red, data, num_iter, num_valid, 0.3, 0.0001, False)
 
 x_loss = []
 x_val = []
@@ -72,12 +72,6 @@ file.close()
 print(loss[-1])
 print(R2)
 
-axis = []
-for i in range(len(pesos)):
-    print(pesos[i], "\n")
-
-print(pesos[1][0] + pesos[0][0])
-
 # ================ Guardar evolución pesos ================
 # Iteración / Delta / Peso actual / Entrada perceptron (z)  / Salida perceptron (a)
 
@@ -86,7 +80,6 @@ for i in range(len(pesos[0])):
     file.write(str(i) + " ")
     for j in range(len(pesos)):
         file.write(str(pesos[j][i]) + " ")
-
     file.write("\n")
 file.close()
 
