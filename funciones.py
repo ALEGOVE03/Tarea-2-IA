@@ -5,7 +5,6 @@ derivadas, las funciones utilizadas son:
 - Sigmoid
 - Tanh
 - Relu
-- Lineal
 '''
 
 import sys  # Para cerrar el programa si hay un error
@@ -37,21 +36,6 @@ def der_ReLU(x):
 ReLU = (lambda x: np.maximum(0, x),
         lambda x: der_ReLU(x))
 
-# Se define la derivada de la función lineal con su derivada
-def der_linear(x):
-    temp = []
-    num = len(x[0])
-    for i in range(len(x)):
-        resul = []
-        for j in range(num):
-            resul.append(1)
-        temp.append(resul)
-
-    return np.array(temp)
-
-# Se define la función lineal y su derivada
-linear = (lambda x: x, lambda x: der_linear(x))
-
 # Función para devolver la función deseada a trabajar en la capa de la red
 def function(nombre):
     if nombre == 'sigmoid':
@@ -60,8 +44,6 @@ def function(nombre):
         return tanh
     elif nombre == 'ReLU':
         return ReLU
-    elif nombre == 'linear':
-        return linear
     else:
         print("Incorrect activation function parameter")
         sys.exit(1)

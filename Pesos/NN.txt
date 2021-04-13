@@ -1,5 +1,5 @@
 3
 sigmoid
 sigmoid
-linear
-140.987
+sigmoid
+2.0

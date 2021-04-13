@@ -80,6 +80,8 @@ def train(neural_net, data, num_iter, num_validation, val_size, lr=0.001, gauss=
     loss_train = []
     loss_valid = []
 
+    pesos = [[], [], [], []]
+
     # Ciclos que controla la cantidad de entrenamientos para la red
     for i in range(num_iter):
 
@@ -100,7 +102,6 @@ def train(neural_net, data, num_iter, num_validation, val_size, lr=0.001, gauss=
 
 
         deltas = []
-
         # Backpropagation y desceso por gradiente
         for l in reversed(range(0, len(neural_net))):
             # Se obtiene la salida de cada capa, se obtuvo en el fordware
@@ -116,6 +117,18 @@ def train(neural_net, data, num_iter, num_validation, val_size, lr=0.001, gauss=
             # esto se debe a que los pesos se actualizan al mismo tiempo
             # del backpropagation
             _W = neural_net[l].w
+
+            if l == 1:
+                if i <= 10:
+                    temp = - lr * out[l][1].T @ deltas[0]
+                    # Actualización de los pesos
+                    pesos[0].append(temp[0][0])
+                    # El peso actual
+                    pesos[1].append(neural_net[1].w[0][0])
+                    # La entrada (net) a el perceptron
+                    pesos[2].append(out[1][0][0][0])
+                    # La salida de la neurona del perceptron
+                    pesos[3].append(out[1][1][0][0])
 
             # Gradient descent
             # Se encarga de actualizar los pesos de la capa de lal red
@@ -156,7 +169,7 @@ def train(neural_net, data, num_iter, num_validation, val_size, lr=0.001, gauss=
     R2 = 1 - (loss/y_mean) # Obtención del R2
 
     # Regresa valores relevantes en la red
-    return [loss_train, loss_valid, R2]
+    return [loss_train, loss_valid, R2, pesos]
 
 # Hacer prediciones de la red neuronal, ya entrenada
 # neural_net: Red neuronal
