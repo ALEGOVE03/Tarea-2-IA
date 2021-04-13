@@ -85,7 +85,7 @@ file = open("Curvas/upgrade.txt", "w")
 for i in range(len(pesos[0])):
     file.write(str(i) + " ")
     for j in range(len(pesos)):
-        file.write(str(pesos[j][i], 6) + " ")
+        file.write(str(pesos[j][i]) + " ")
 
     file.write("\n")
 file.close()
