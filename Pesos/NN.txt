@@ -1,5 +1,5 @@
 3
-sigmoid
-sigmoid
-sigmoid
+tanh
+tanh
+tanh
 2.0

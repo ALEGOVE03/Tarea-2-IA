@@ -23,9 +23,9 @@ data = data.T
 print(data)
 
 # Se define la red con la cantidad de capas a utilizar
-red = [nn.neural_layer(len(data[0][:-1]), 4, 'sigmoid'),
-       nn.neural_layer(4, 4, 'sigmoid'),
-       nn.neural_layer(4, 1, 'sigmoid')]
+red = [nn.neural_layer(len(data[0][:-1]), 4, 'tanh'),
+       nn.neural_layer(4, 4, 'tanh'),
+       nn.neural_layer(4, 1, 'tanh')]
 
 # Numero de iteraciones de entrenamiento
 num_iter = 50
@@ -79,14 +79,13 @@ for i in range(len(pesos)):
 print(pesos[1][0] + pesos[0][0])
 
 # ================ Guardar evolución pesos ================
-
 # Iteración / Delta / Peso actual / Entrada perceptron (z)  / Salida perceptron (a)
 
 file = open("Curvas/upgrade.txt", "w")
 for i in range(len(pesos[0])):
     file.write(str(i) + " ")
     for j in range(len(pesos)):
-        file.write(str(pesos[j][i]) + " ")
+        file.write(str(pesos[j][i], 6) + " ")
 
     file.write("\n")
 file.close()
